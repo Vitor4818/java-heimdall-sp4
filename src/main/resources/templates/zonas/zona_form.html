@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (title=${pageTitle}, content=~{::#conteudo})}">
+<head>
+</head>
+<body>
+<div id="conteudo">
+
+    <h1 th:text="${pageTitle}"></h1>
+
+    <div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+    <form th:action="@{/zonas/save}" th:object="${zona}" method="post">
+
+        <input type="hidden" th:field="*{id}" />
+
+        <label for="nome">Nome da Zona:</label>
+        <input type="text" id="nome" th:field="*{nome}" placeholder="Ex: ZC1-COMBUSTÃO" required />
+
+        <label for="tipo">Tipo de Zona:</label>
+        <select id="tipo" th:field="*{tipo}" required>
+            <option value="Combustao">Combustão</option>
+            <option value="Eletrica">Elétrica</option>
+        </select>
+
+        <button type="submit">Atualizar Zona</button>
+    </form>
+
+    <a th:href="@{/zonas}" class="back-link">← Voltar para a lista</a>
+
+</div>
+</body>
+</html>

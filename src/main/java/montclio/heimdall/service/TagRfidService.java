@@ -21,6 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 
 @Service
 public class TagRfidService {
@@ -121,6 +124,52 @@ public class TagRfidService {
         tagRfidRepository.deleteById(id);
     }
 
+    // ----------------------------------------------------
+    // NOVOS MÉTODOS PARA O MVC (CRUD DIRETO)
+    // ----------------------------------------------------
 
+
+
+    public Page<TagRfId> findAllPageable(TagRfidFilter filter, Pageable pageable) {
+        Specification<TagRfId> spec = TagRfidSpecification.withFilter(filter);
+        return tagRfidRepository.findAll(spec, pageable);
+    }
+
+
+    public TagRfId findById(Long id) {
+        return tagRfidRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tag RFID com ID " + id + " não encontrada."));
+    }
+
+
+    private void validateMotorcycleAssociation(Long motoId, Long tagId) {
+        if (motoId == null) {
+            return;
+        }
+        // Verifica se a Moto existe
+        if (!motorcycleRepository.existsById(motoId)) {
+            throw new ResourceNotFoundException("Moto com ID " + motoId + " não encontrada.");
+        }
+        // Verifica se já existe tag para essa moto
+        boolean exists;
+        if (tagId == null) {
+            exists = tagRfidRepository.existsByMotorcycleId(motoId);
+        } else {
+            Motorcycle moto = motorcycleRepository.findById(motoId).get();
+            exists = tagRfidRepository.existsByMotorcycleAndIdNot(moto, tagId);
+        }
+        if (exists) {
+            throw new DataConflictException("A moto selecionada já possui uma tag RFID associada.");
+        }
+    }
+
+
+    @Transactional
+    @CacheEvict(value = {"tags", "tagById"}, allEntries = true)
+    public TagRfId save(TagRfId tag) {
+        Long motoId = (tag.getMotorcycle() != null) ? tag.getMotorcycle().getId() : null;
+        validateMotorcycleAssociation(motoId, tag.getId());
+        return tagRfidRepository.save(tag);
+    }
 
 }

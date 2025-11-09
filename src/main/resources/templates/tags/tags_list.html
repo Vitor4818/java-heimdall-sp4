@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout (title='Gerenciamento de Tags RFID', content=~{::#conteudo})}">
+<head></head>
+<body>
+<div id="conteudo">
+
+    <h1>Gerenciamento de Tags RFID</h1>
+
+    <div th:if="${message}" th:text="${message}" class="message-box"></div>
+    <div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+    <form th:action="@{/tags}" method="get" class="search-form" id="search-form">
+        <input type="text" name="frequencia" th:value="${filter != null ? filter.frequencia : ''}" placeholder="Buscar por Frequência..." style="width: 200px; margin-top: 0;">
+        <input type="text" name="aplicacao" th:value="${filter != null ? filter.aplicacao : ''}" placeholder="Buscar por Aplicação..." style="width: 250px; margin-top: 0;">
+        <button type="submit" style="width: auto; margin-top: 0;">Buscar</button>
+        <a th:href="@{/tags}" class="action-link delete" style="margin-left: 15px;">Limpar</a>
+    </form>
+
+    <hr style="border-color: #eee; margin: 25px 0;">
+
+    <div sec:authorize="hasAuthority('ADMIN')">
+        <a href="/tags/new" class="btn btn-new">Cadastrar Nova Tag</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Frequência</th>
+            <th>Aplicação</th>
+            <th>Moto Associada (ID/Placa)</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="tag : ${listaTags}">
+            <td th:text="${tag.id}"></td>
+            <td th:text="${tag.frequencia}"></td>
+            <td th:text="${tag.aplicacao}"></td>
+            <td th:if="${tag.motorcycle != null}">
+                    <span th:text="${tag.motorcycle.id} + ' / ' + ${tag.motorcycle.plate}"
+                          style="background-color: var(--bg-body); padding: 2px 8px; border-radius: 4px; font-weight: 600; border: 1px solid var(--border-light);">
+                    </span>
+            </td>
+            <td th:unless="${tag.motorcycle != null}">
+                <span style="color: var(--text-muted); font-style: italic;">Não Associada</span>
+            </td>
+            <td>
+                <a th:href="@{'/tags/view/' + ${tag.id}}" class="action-link">Detalhes</a>
+
+                <a th:href="@{'/tags/edit/' + ${tag.id}}" class="action-link" sec:authorize="hasAnyAuthority('ADMIN', 'USER')">Editar</a>
+
+                <a th:href="@{'/tags/delete/' + ${tag.id}}" class="action-link delete"
+                   sec:authorize="hasAuthority('ADMIN')"
+                   onclick="return confirm('Tem certeza que deseja deletar esta Tag?');">Deletar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${tagPage.totalPages > 1}" class="pagination-container">
+            <span style="margin-right: 15px; color: var(--secondary); font-weight: 500;">
+                Página <strong th:text="${tagPage.number + 1}">1</strong> de <span th:text="${tagPage.totalPages}">1</span>
+            </span>
+        <span th:each="i : ${#numbers.sequence(0, tagPage.totalPages - 1)}">
+                <a th:if="${i != tagPage.number}"
+                   th:href="@{/tags(page=${i}, size=${tagPage.size}, frequencia=${filter != null ? filter.frequencia : ''}, aplicacao=${filter != null ? filter.aplicacao : ''})}"
+                   th:text="${i + 1}" class="btn btn-page"></a>
+                <span th:unless="${i != tagPage.number}" class="btn-page-current" th:text="${i + 1}"></span>
+            </span>
+    </div>
+
+    <script>
+        document.getElementById('search-form').onsubmit = function() {
+            const freqInput = this.querySelector('input[name="frequencia"]');
+            const aplicInput = this.querySelector('input[name="aplicacao"]');
+            if (freqInput.value) freqInput.value = freqInput.value.trim();
+            if (aplicInput.value) aplicInput.value = aplicInput.value.trim();
+            return true;
+        };
+    </script>
+
+</div>
+</body>
+</html>

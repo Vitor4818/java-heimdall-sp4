@@ -15,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 
     boolean existsByCpfAndIdNot(String cpf, Long id);
     boolean existsByCpf(String cpf);
+
+    Optional<User> findByEmail(String email);
 }

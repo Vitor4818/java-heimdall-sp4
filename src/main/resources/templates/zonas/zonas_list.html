@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout (title='Gerenciamento de Zonas', content=~{::#conteudo})}">
+<head></head>
+<body>
+<div id="conteudo">
+
+    <h1>Gerenciamento de Zonas de Estacionamento</h1>
+
+    <div th:if="${message}" th:text="${message}" class="message-box"></div>
+    <div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+    <p style="color: var(--danger); font-weight: 500; margin-bottom: 25px;">
+        * Criação de novas zonas não é permitida. Apenas edição de infraestrutura existente.
+    </p>
+
+    <table style="max-width: 800px;">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome da Zona</th>
+            <th>Tipo</th>
+            <th sec:authorize="hasAuthority('ADMIN')">Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="zona : ${listaZonas}">
+            <td th:text="${zona.id}"></td>
+            <td th:text="${zona.nome}" style="font-weight: bold;"></td>
+            <td>
+                    <span th:text="${zona.tipo}"
+                          style="background-color: var(--border-light); padding: 3px 8px; border-radius: 12px; font-size: 0.9em;">
+                    </span>
+            </td>
+
+            <td sec:authorize="hasAuthority('ADMIN')">
+                <a th:href="@{'/zonas/edit/' + ${zona.id}}" class="action-link">Editar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+</body>
+</html>

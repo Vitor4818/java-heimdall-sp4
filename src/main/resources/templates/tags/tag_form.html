@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (title=${pageTitle}, content=~{::#conteudo})}">
+<head></head>
+<body>
+<div id="conteudo">
+
+    <h1 th:text="${pageTitle}"></h1>
+
+    <div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+    <form th:action="@{/tags/save}" th:object="${tag}" method="post">
+
+        <input type="hidden" th:field="*{id}" />
+
+        <label for="frequencia">Frequência (ex: UHF):</label>
+        <input type="text" id="frequencia" th:field="*{frequencia}" required />
+
+        <label for="banda">Banda:</label>
+        <input type="text" id="banda" th:field="*{banda}" required />
+
+        <label for="aplicacao">Aplicação:</label>
+        <input type="text" id="aplicacao" th:field="*{aplicacao}" required />
+
+        <hr style="border-color: var(--border-light); margin: 30px 0;">
+
+        <label for="motorcycle">Associar à Moto:</label>
+        <select id="motorcycle" th:field="*{motorcycle}">
+            <option value="">-- Desvincular / Nenhuma Moto --</option>
+            <option th:each="moto : ${allMotorcycles}"
+                    th:value="${moto.id}"
+                    th:text="${moto.plate} + ' (' + ${moto.motorcycleType} + ')'"
+                    th:selected="${tag.motorcycle != null and tag.motorcycle.id == moto.id}">
+            </option>
+        </select>
+
+        <button type="submit">Salvar Tag</button>
+    </form>
+
+    <a th:href="@{/tags}" class="back-link">← Voltar para a lista</a>
+
+</div>
+</body>
+</html>

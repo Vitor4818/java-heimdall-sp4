@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (title=${pageTitle}, content=~{::#conteudo})}">
+<head></head>
+<body>
+<div id="conteudo">
+
+    <h1 th:text="${pageTitle}"></h1>
+
+    <div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+    <form th:action="@{/vagas/save}" th:object="${vaga}" method="post">
+
+        <input type="hidden" th:field="*{id}" />
+        <input type="hidden" th:field="*{ocupada}" />
+
+        <label for="codigo">Código da Vaga:</label>
+        <input type="text" id="codigo" th:field="*{codigo}" placeholder="Ex: ZC1VG05" required />
+
+        <label for="zona">Zona:</label>
+        <select id="zona" th:field="*{zona}" required>
+            <option th:value="${null}">-- Selecione a Zona --</option>
+            <option th:each="zona : ${allZonas}"
+                    th:value="${zona.id}"
+                    th:text="${zona.nome} + ' (' + ${zona.tipo} + ')'"
+                    th:selected="${vaga.zona != null and vaga.zona.id == zona.id}">
+            </option>
+        </select>
+
+        <div th:if="*{moto != null}" style="margin-top: 25px; padding: 15px; background-color: rgba(220, 53, 69, 0.1); border-radius: 8px; border-left: 5px solid var(--danger);">
+            <label style="margin-top: 0; color: var(--danger);">Status: OCUPADA</label>
+            <p style="margin: 8px 0; color: var(--text-main);">
+                <strong>Moto:</strong> <span th:text="*{moto.plate}"></span> <br>
+                <strong>Chassi:</strong> <span th:text="*{moto.chassiNumber}"></span>
+            </p>
+            <p style="font-size: 0.9em; color: var(--text-muted); margin-top: 10px; font-style: italic;">
+                * Para liberar esta vaga, edite a Moto correspondente e remova a associação de vaga.
+            </p>
+        </div>
+
+        <button type="submit" style="margin-top: 30px;">Salvar Vaga</button>
+    </form>
+
+    <a th:href="@{/vagas}" class="back-link">← Voltar para a lista</a>
+
+</div>
+</body>
+</html>

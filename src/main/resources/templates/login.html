@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Heimdall</title>
+    <style th:replace="~{fragments/menu :: menu-css}"></style>
+    <style>
+        /* Estilos específicos para centralizar o login */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--bg-main);
+        }
+        .login-container {
+            background-color: var(--bg-panel);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .login-title {
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 2em;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+        .login-form input {
+            margin-bottom: 20px;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            font-size: 1.1em;
+            background-color: var(--primary);
+            color: var(--white);
+            border: none; border-radius: 6px; font-weight: bold; cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .login-btn:hover { background-color: var(--accent); }
+
+        /* Estilo para o link de registro */
+        .register-link {
+            margin-top: 25px;
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.95em;
+        }
+        .register-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .register-link a:hover { text-decoration: underline; color: var(--accent); }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="login-title">⚡ HEIMDALL</div>
+
+    <div th:if="${param.error}" style="color: var(--danger); margin-bottom: 20px; font-weight: bold;">
+        Email ou senha inválidos.
+    </div>
+    <div th:if="${param.logout}" style="color: var(--success); margin-bottom: 20px; font-weight: bold;">
+        Você saiu do sistema.
+    </div>
+
+    <div th:if="${message}" th:text="${message}" style="color: var(--success); margin-bottom: 20px; font-weight: bold;"></div>
+
+    <form th:action="@{/login}" method="post" class="login-form" style="max-width: 100%; padding: 0; background: none; border: none; box-shadow: none;">
+        <div style="text-align: left;">
+            <label for="email" style="margin-top: 0; color: var(--text-secondary);">Email</label>
+            <input type="text" id="email" name="email" required autofocus placeholder="exemplo@heimdall.com" />
+        </div>
+        <div style="text-align: left;">
+            <label for="password" style="color: var(--text-secondary);">Senha</label>
+            <input type="password" id="password" name="password" required placeholder="••••••" />
+        </div>
+        <button type="submit" class="login-btn">ENTRAR</button>
+    </form>
+
+    <span class="register-link">
+            Não tem uma conta? <a th:href="@{/register}">Crie agora</a>
+        </span>
+</div>
+</body>
+</html>

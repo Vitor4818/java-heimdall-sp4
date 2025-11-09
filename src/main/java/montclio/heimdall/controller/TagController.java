@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/tags")
+@RequestMapping("/api/tags")
 @Tag(name = "Tag RFID", description = "Operações relacionadas às tags RFID")
 public class TagController {
 

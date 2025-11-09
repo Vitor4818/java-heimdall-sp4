@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout (title='Gerenciamento de Vagas', content=~{::#conteudo})}">
+<head></head>
+<body>
+<div id="conteudo">
+
+    <h1>Gerenciamento de Vagas de Pátio</h1>
+
+    <div th:if="${message}" th:text="${message}" class="message-box"></div>
+    <div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+    <form th:action="@{/vagas}" method="get" class="search-form" id="search-form-vaga">
+        <input type="text"
+               name="codigo"
+               th:value="${filter != null ? filter.codigo : ''}"
+               placeholder="Buscar por Código..."
+               style="width: 150px; margin-top: 0;">
+
+        <select name="zonaId" style="width: 180px; margin-top: 0;">
+            <option th:value="${null}">-- Todas as Zonas --</option>
+            <option th:each="zona : ${allZonas}"
+                    th:value="${zona.id}"
+                    th:text="${zona.nome}"
+                    th:selected="${filter != null and filter.zonaId == zona.id}">
+            </option>
+        </select>
+
+        <select name="isOccupied" style="width: 180px; margin-top: 0;">
+            <option th:value="${null}">-- Status (Todos) --</option>
+            <option value="true" th:selected="${filter != null and filter.isOccupied == true}">Ocupada</option>
+            <option value="false" th:selected="${filter != null and filter.isOccupied == false}">Livre</option>
+        </select>
+
+        <button type="submit" style="width: auto; margin-top: 0;">Filtrar</button>
+        <a th:href="@{/vagas}" class="action-link delete" style="margin-left: 15px;">Limpar</a>
+    </form>
+
+    <hr style="border-color: #eee; margin: 25px 0;">
+
+    <div sec:authorize="hasAuthority('ADMIN')">
+        <a href="/vagas/new" class="btn btn-new">Cadastrar Nova Vaga</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Código</th>
+            <th>Zona</th>
+            <th>Status</th>
+            <th>Moto Ocupante</th>
+            <th sec:authorize="hasAuthority('ADMIN')">Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="vaga : ${listaVagas}">
+            <td th:text="${vaga.id}"></td>
+            <td th:text="${vaga.codigo}" style="font-weight: bold;"></td>
+            <td th:text="${vaga.zona.nome}"></td>
+            <td>
+                    <span th:class="${vaga.ocupada ? 'status-occupied' : 'status-free'}"
+                          th:text="${vaga.ocupada ? 'OCUPADA' : 'LIVRE'}">
+                    </span>
+            </td>
+            <td>
+                    <span th:if="${vaga.moto != null}"
+                          th:text="${vaga.moto.plate}"
+                          style="background-color: var(--bg-body); padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid var(--border-light);">
+                    </span>
+                <span th:unless="${vaga.moto != null}" style="color: var(--text-muted);">---</span>
+            </td>
+
+            <td sec:authorize="hasAuthority('ADMIN')">
+                <a th:href="@{'/vagas/edit/' + ${vaga.id}}" class="action-link">Editar</a>
+                <a th:href="@{'/vagas/delete/' + ${vaga.id}}" class="action-link delete" onclick="return confirm('Tem certeza?');">Deletar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${vagaPage.totalPages > 1}" class="pagination-container">
+            <span style="margin-right: 15px; color: var(--secondary); font-weight: 500;">
+                Página <strong th:text="${vagaPage.number + 1}">1</strong> de <span th:text="${vagaPage.totalPages}">1</span>
+            </span>
+
+        <span th:each="i : ${#numbers.sequence(0, vagaPage.totalPages - 1)}">
+                <a th:if="${i != vagaPage.number}"
+                   th:href="@{/vagas(page=${i}, size=${vagaPage.size}, codigo=${filter.codigo}, zonaId=${filter.zonaId}, isOccupied=${filter.isOccupied})}"
+                   th:text="${i + 1}"
+                   class="btn btn-page">
+                </a>
+                <span th:unless="${i != vagaPage.number}"
+                      class="btn-page-current"
+                      th:text="${i + 1}">
+                </span>
+            </span>
+    </div>
+
+    <script>
+        document.getElementById('search-form-vaga').onsubmit = function() {
+            const codigoInput = this.querySelector('input[name="codigo"]');
+            if (codigoInput.value) codigoInput.value = codigoInput.value.trim();
+            return true;
+        };
+    </script>
+
+</div>
+</body>
+</html>

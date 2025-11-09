@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (title='Lista de Usuários', content=~{::#conteudo})}">
+<head></head>
+<body>
+<div id="conteudo">
+
+    <h1>Gerenciamento de Usuários</h1>
+
+    <div th:if="${message}" th:text="${message}" class="message-box"></div>
+    <div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+    <form th:action="@{/users}" method="get" id="search-form" style="display: flex; gap: 10px; align-items: center; max-width: 100%; background: none; border: none; padding: 0; box-shadow: none;">
+        <input type="text" name="name" th:value="${filter.name}" placeholder="Buscar por Nome..." style="width: 200px; margin-top: 0;">
+        <input type="text" name="email" th:value="${filter.email}" placeholder="Buscar por Email..." style="width: 250px; margin-top: 0;">
+        <button type="submit" style="width: auto; margin-top: 0;">Buscar</button>
+        <a th:href="@{/users}" style="color: var(--danger); margin-left: 15px; text-decoration: none; font-weight: bold;">Limpar</a>
+    </form>
+
+    <hr style="border-color: #eee; margin: 25px 0;">
+
+    <a href="/users/new" class="btn btn-new">Adicionar Novo Usuário</a>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome Completo</th>
+            <th>Email</th>
+            <th>CPF</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="usuario : ${listaUsuarios}">
+            <td th:text="${usuario.id}"></td>
+            <td th:text="${usuario.name} + ' ' + ${usuario.middleName}"></td>
+            <td th:text="${usuario.email}"></td>
+            <td th:text="${usuario.cpf}"></td>
+            <td>
+                <a th:href="@{'/users/view/' + ${usuario.id}}" class="action-link">Ver Perfil</a>
+                <a th:href="@{'/users/edit/' + ${usuario.id}}" class="action-link">Editar</a>
+                <a th:href="@{'/users/delete/' + ${usuario.id}}" class="action-link delete" onclick="return confirm('Tem certeza?');">Deletar</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${userPage.totalPages > 1}" class="pagination-container">
+
+        <span th:each="i : ${#numbers.sequence(0, userPage.totalPages - 1)}">
+                <a th:if="${i != userPage.number}"
+                   th:href="@{/users(page=${i}, size=${userPage.size}, name=${filter.name}, email=${filter.email})}"
+                   th:text="${i + 1}"
+                   class="btn btn-page">
+                </a>
+
+                <span th:unless="${i != userPage.number}"
+                      class="btn-page-current"
+                      th:text="${i + 1}">
+                </span>
+            </span>
+    </div>
+
+    <script>
+        document.getElementById('search-form').onsubmit = function() {
+            const nameInput = this.querySelector('input[name="name"]');
+            const emailInput = this.querySelector('input[name="email"]');
+            if (nameInput.value) nameInput.value = nameInput.value.trim();
+            if (emailInput.value) emailInput.value = emailInput.value.trim();
+            return true;
+        };
+    </script>
+
+</div>
+</body>
+</html>

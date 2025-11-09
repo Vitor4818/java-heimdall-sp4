@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (title=${pageTitle}, content=~{::#conteudo})}">
+<head></head>
+<body>
+<div id="conteudo">
+
+    <h1 th:text="${pageTitle}"></h1>
+
+    <div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+    <form th:action="@{/motorcycles/save}" th:object="${motorcycle}" method="post">
+
+        <input type="hidden" th:field="*{id}" />
+
+        <h2>Detalhes da Moto</h2>
+
+        <label for="plate">Placa:</label>
+        <input type="text" id="plate" th:field="*{plate}" required maxlength="7" />
+
+        <label for="chassiNumber">Número do Chassi:</label>
+        <input type="text" id="chassiNumber" th:field="*{chassiNumber}" required />
+
+        <label for="motorcycleType">Tipo de Moto:</label>
+        <select id="motorcycleType" th:field="*{motorcycleType}" required>
+            <option th:value="${null}">-- Selecione o Tipo --</option>
+            <option th:each="enumType : ${T(montclio.heimdall.model.MotorcycleType).values()}"
+                    th:value="${enumType}"
+                    th:text="${enumType}"
+                    th:selected="*{motorcycleType} == ${enumType}">
+            </option>
+        </select>
+
+        <hr style="border-color: var(--border-light); margin: 30px 0;">
+
+        <h2>Gerenciamento de Pátio</h2>
+
+        <div th:if="*{tag == null}" class="warning-box" style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #ffc107;">
+            ⚠ <strong>Atenção:</strong> Para associar esta moto a uma vaga, primeiro vincule uma <strong>Tag RFID</strong> no menu de Tags.
+        </div>
+
+        <label for="vaga">Vaga Designada:</label>
+        <select id="vaga" th:field="*{vaga}" th:disabled="*{tag == null}">
+            <option th:value="${null}">-- Liberar Vaga / Nenhuma --</option>
+            <option th:each="v : ${allVagas}"
+                    th:value="${v.id}"
+                    th:text="${v.codigo} + ' - (' + ${v.ocupada ? 'OCUPADA' : 'LIVRE'} + ')'"
+                    th:disabled="${v.ocupada and (motorcycle.vaga == null or v.id != motorcycle.vaga.id)}"
+                    th:selected="${motorcycle.vaga != null and v.id == motorcycle.vaga.id}">
+            </option>
+        </select>
+
+        <p style="font-size: 0.8em; color: var(--text-muted); margin-top: 8px;" th:if="*{tag != null}">
+            * O sistema bloqueará a ocupação de vagas já preenchidas.
+        </p>
+
+        <button type="submit">Salvar Moto</button>
+    </form>
+
+    <a th:href="@{/motorcycles}" class="back-link">← Voltar para a lista</a>
+
+</div>
+</body>
+</html>

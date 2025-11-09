@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: layout (title='Gerenciamento de Motos', content=~{::#conteudo})}">
+<head></head>
+<body>
+<div id="conteudo">
+
+    <h1>Gerenciamento de Motocicletas</h1>
+
+    <div th:if="${message}" th:text="${message}" class="message-box"></div>
+    <div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+    <form th:action="@{/motorcycles}" method="get" class="search-form" id="search-form-motos" style="display: flex; gap: 10px; align-items: center; max-width: 100%; background: none; border: none; padding: 0; box-shadow: none;">
+        <input type="text"
+               name="plate"
+               th:value="${filter != null ? filter.plate : ''}"
+               placeholder="Buscar por Placa..."
+               style="width: 180px; margin-top: 0;">
+
+        <input type="text"
+               name="chassiNumber"
+               th:value="${filter != null ? filter.chassiNumber : ''}"
+               placeholder="Buscar por Chassi..."
+               style="width: 200px; margin-top: 0;">
+
+        <button type="submit" style="width: auto; margin-top: 0;">Buscar</button>
+        <a th:href="@{/motorcycles}" class="action-link delete" style="margin-left: 15px;">Limpar</a>
+    </form>
+
+    <hr style="border-color: #eee; margin: 25px 0;">
+
+    <div sec:authorize="hasAnyAuthority('ADMIN', 'USER')">
+        <a href="/motorcycles/new" class="btn btn-new">Cadastrar Nova Moto</a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Placa</th>
+            <th>Tipo</th>
+            <th>Chassi</th>
+            <th>Vaga Atual</th>
+            <th>Status Tag</th>
+            <th sec:authorize="hasAnyAuthority('ADMIN', 'USER')">Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="moto : ${listaMotos}">
+            <td th:text="${moto.id}"></td>
+            <td th:text="${moto.plate}" style="font-weight: bold;"></td>
+            <td th:text="${moto.motorcycleType}"></td>
+            <td th:text="${moto.chassiNumber}"></td>
+
+            <td th:if="${moto.vaga != null}">
+                    <span th:text="${moto.vaga.codigo}"
+                          style="background-color: var(--bg-body); padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid var(--border-light);">
+                    </span>
+            </td>
+            <td th:unless="${moto.vaga != null}" style="color: var(--text-muted);">---</td>
+
+            <td th:if="${moto.tag != null}">
+                <span style="color: var(--success); font-weight: bold;">Ativa</span>
+                <span style="font-size: 0.9em; color: var(--text-muted);" th:text="'(ID: ' + ${moto.tag.id} + ')'"></span>
+            </td>
+            <td th:unless="${moto.tag != null}" style="color: var(--danger); font-weight: bold;">Inativa</td>
+
+            <td sec:authorize="hasAnyAuthority('ADMIN', 'USER')">
+                <a th:href="@{'/motorcycles/edit/' + ${moto.id}}" class="action-link">Editar</a>
+
+                <span sec:authorize="hasAuthority('ADMIN')">
+                         | <a th:href="@{'/motorcycles/delete/' + ${moto.id}}" class="action-link delete" onclick="return confirm('Tem certeza que deseja deletar esta moto?');">Deletar</a>
+                    </span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div th:if="${motoPage.totalPages > 1}" class="pagination-container">
+            <span style="margin-right: 15px; color: var(--secondary); font-weight: 500;">
+                Página <strong th:text="${motoPage.number + 1}">1</strong> de <span th:text="${motoPage.totalPages}">1</span>
+            </span>
+
+        <span th:each="i : ${#numbers.sequence(0, motoPage.totalPages - 1)}">
+                <a th:if="${i != motoPage.number}"
+                   th:href="@{/motorcycles(page=${i}, size=${motoPage.size}, plate=${filter != null ? filter.plate : ''}, chassiNumber=${filter != null ? filter.chassiNumber : ''})}"
+                   th:text="${i + 1}"
+                   class="btn btn-page">
+                </a>
+                <span th:unless="${i != motoPage.number}"
+                      class="btn-page-current"
+                      th:text="${i + 1}">
+                </span>
+            </span>
+    </div>
+
+    <script>
+        document.getElementById('search-form-motos').onsubmit = function() {
+            const plateInput = this.querySelector('input[name="plate"]');
+            const chassiInput = this.querySelector('input[name="chassiNumber"]');
+            if (plateInput.value) plateInput.value = plateInput.value.trim();
+            if (chassiInput.value) chassiInput.value = chassiInput.value.trim();
+            return true;
+        };
+    </script>
+
+</div>
+</body>
+</html>

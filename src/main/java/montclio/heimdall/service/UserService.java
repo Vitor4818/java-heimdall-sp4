@@ -21,7 +21,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -36,12 +37,15 @@ public class UserService {
     private UserCategoryRepository categoryRepository;
 
 
+    // ----------------------------------------------------
+    // MÉTODOS EXISTENTES (REST/API)
+    // ----------------------------------------------------
+
     public Page<GetUserDTO> getAllUsers(UserFilter filter, Pageable page) {
         Specification<User> spec = UserSpecification.withFilter(filter);
         return userRepository.findAll(spec, page).map(GetUserDTO::new);
     }
 
-    // Retorna usuário por ID
     @Cacheable(value = "userById", key = "#id")
     public GetUserDTO getUserById(Long id) {
         return userRepository.findById(id)
@@ -49,16 +53,14 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario com ID " + id + " não encontrado"));
     }
 
-    // Cadastra novo usuário
     @Transactional
     @CacheEvict(value = "users", allEntries = true)
     public User postUser(PostUserDTO dto) {
-
+        // Validações complexas de email e CPF antes de criar (Ótimo!)
         boolean exist = userRepository.existsByEmail(dto.email());
         if (exist){
             throw new DataConflictException("Esse e-mail já está sendo usado por outro usuário");
         }
-
         if (userRepository.existsByCpf(dto.cpf())) {
             throw new DataConflictException("Esse CPF ja esta cadastrado");
         }
@@ -76,7 +78,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // Atualiza usuário
     @Transactional
     @CacheEvict(value = {"users", "userById"}, allEntries = true)
     public void putUser(Long id, PutUserDTO userDTO) {
@@ -87,12 +88,10 @@ public class UserService {
         if (userRepository.existsByCpfAndIdNot(userDTO.cpf(), id)) {
             throw new DataConflictException("Esse CPF ja esta cadastrado");
         }
-
         user.updateData(userDTO);
     }
 
 
-    // Deleta usuário
     @Transactional
     @CacheEvict(value = {"users", "userById"}, allEntries = true)
     public void deleteUser(Long id) {
@@ -100,4 +99,94 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario com ID " + id + " não encontrado"));
         userRepository.delete(user);
     }
+
+    // ----------------------------------------------------
+    // NOVOS MÉTODOS PARA O MVC (CRUD DIRETO)
+    // ----------------------------------------------------
+
+    // Expõe o PasswordEncoder para que o Controller MVC possa criptografar senhas.
+    public BCryptPasswordEncoder getPasswordEncoder() {
+        return passwordEncoder;
+    }
+
+    //Retorna todos os usuarios para o controller de MVC
+    public Page<User> findPageableUsers(UserFilter filter, Pageable pageable) {
+        Specification<User> spec = UserSpecification.withFilter(filter);
+        return userRepository.findAll(spec, pageable);
+    }
+
+
+     //Retorna um usuário por ID (Entidade User) para edição ou detalhes. (ControllerMVC)
+    public User findById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário com ID " + id + " não encontrado."));
+    }
+
+    //Salva ou atualiza uma entidade User diretamente (para uso do formulário MVC).
+    @Transactional
+    @CacheEvict(value = {"users", "userById"}, allEntries = true)
+    public User save(User user) {
+
+        // 1. LIMPEZA DE DADOS (Trim)
+        String emailLimpo = user.getEmail() != null ? user.getEmail().trim() : null;
+        String cpfLimpo = user.getCpf() != null ? user.getCpf().trim() : null;
+        user.setEmail(emailLimpo);
+        user.setCpf(cpfLimpo);
+
+        if (user.getId() == null) {
+            // --- CRIAÇÃO (NEW) ---
+
+            // Validação de Unicidade
+            if (userRepository.existsByEmail(emailLimpo)) {
+                throw new DataConflictException("Esse e-mail já está sendo usado por outro usuário.");
+            }
+            if (userRepository.existsByCpf(cpfLimpo)) {
+                throw new DataConflictException("Esse CPF já está cadastrado.");
+            }
+
+            // CRIPTOGRAFIA (Obrigatória na criação)
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        } else {
+            // --- EDIÇÃO (UPDATE) ---
+
+            User existingUser = userRepository.findById(user.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado para atualização."));
+
+            // Validação de Unicidade (ignorando o próprio ID)
+            if (userRepository.existsByEmailAndIdNot(emailLimpo, user.getId())) {
+                throw new DataConflictException("Esse e-mail já está sendo usado por outro usuário.");
+            }
+            if (userRepository.existsByCpfAndIdNot(cpfLimpo, user.getId())) {
+                throw new DataConflictException("Esse CPF já está cadastrado.");
+            }
+
+            // Lógica de Senha na Edição:
+            if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                // Se veio vazia no formulário, mantém a antiga (já criptografada)
+                user.setPassword(existingUser.getPassword());
+            } else {
+                // Se o usuário digitou uma NOVA senha, criptografa ela agora
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
+        }
+
+        // 3. Persistência
+        return userRepository.save(user);
+    }
+
+    public User findAndPrepareForEdit(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário com ID " + id + " não encontrado."));
+        user.setPassword(null);
+        return user;
+    }
+
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário logado não encontrado no banco."));
+    }
+
+
 }
