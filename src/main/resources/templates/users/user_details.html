@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}"></title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f7f9; }
+        h1 { color: #007bff; border-bottom: 3px solid #007bff; padding-bottom: 10px; margin-bottom: 25px; }
+        .detail-box { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 400px; }
+        .detail-item { margin-bottom: 15px; }
+        .detail-label { font-weight: 600; color: #555; display: block; margin-bottom: 5px; }
+        .detail-value { padding-left: 10px; border-left: 3px solid #28a745; }
+        .back-link { display: block; margin-top: 30px; color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+<h1 th:text="${pageTitle}"></h1>
+
+<div class="detail-box" th:object="${user}">
+    <div class="detail-item">
+        <span class="detail-label">ID:</span>
+        <span class="detail-value" th:text="*{id}"></span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Nome Completo:</span>
+        <span class="detail-value" th:text="*{name} + ' ' + *{middleName}"></span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">Email:</span>
+        <span class="detail-value" th:text="*{email}"></span>
+    </div>
+    <div class="detail-item">
+        <span class="detail-label">CPF:</span>
+        <span class="detail-value" th:text="*{cpf}"></span>
+    </div>
+</div>
+
+<a th:href="@{'/users/edit/' + ${user.id}}" class="back-link" style="color: #28a745;">Editar Usuário</a>
+<a href="/users" class="back-link">Voltar para a lista</a>
+
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciamento de Motos - Heimdall</title>
+    <style>
+        /* ESTILIZAÇÃO COMPLETA E CORRETA */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+        h1 {
+            color: #dc3545; /* Vermelho padrão para este título */
+            border-bottom: 3px solid #dc3545;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+        .message-box {
+            background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;
+            padding: 10px; margin-bottom: 20px; border-radius: 5px;
+        }
+        .error-box {
+            background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;
+            padding: 10px; margin-bottom: 20px; border-radius: 5px; font-weight: bold;
+        }
+        table {
+            width: 100%; border-collapse: collapse; background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden;
+        }
+        th, td {
+            border: 1px solid #e0e0e0; padding: 12px 15px; text-align: left;
+        }
+        th {
+            background-color: #007bff; /* Azul padrão */
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #e9ecef;
+        }
+        a {
+            color: #28a745;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .btn-new {
+            display: inline-block; padding: 10px 15px;
+            background-color: #007bff;
+            color: white; text-decoration: none; border-radius: 5px;
+            font-weight: bold; margin-bottom: 15px;
+        }
+        .btn-new:hover {
+            background-color: #0056b3;
+        }
+
+        /* Estilos de Busca/Filtro */
+        .search-form input, .search-form button { padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+        .search-form button { background-color: #007bff; color: white; cursor: pointer; border-color: #007bff; margin-left: 10px; }
+        .search-form a { margin-left: 10px; color: #dc3545; text-decoration: none; }
+    </style>
+</head>
+<body>
+<h1>Gerenciamento de Motocicletas</h1>
+
+<div th:if="${message}" th:text="${message}" class="message-box"></div>
+<div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+<form th:action="@{/motorcycles}" method="get" class="search-form" id="search-form-motos">
+    <input type="text"
+           name="plate"
+           th:value="${filter != null ? filter.plate : ''}"
+           placeholder="Buscar por Placa..."
+           style="width: 150px;">
+
+    <input type="text"
+           name="chassiNumber"
+           th:value="${filter != null ? filter.chassiNumber : ''}"
+           placeholder="Buscar por Chassi..."
+           style="width: 200px;">
+
+    <button type="submit">Buscar</button>
+    <a th:href="@{/motorcycles}" style="color: #dc3545;">Limpar Filtros</a>
+</form>
+
+<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+<p><a href="/motorcycles/new" class="btn-new">Cadastrar Nova Moto</a></p>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Placa</th>
+        <th>Tipo</th>
+        <th>Chassi</th>
+        <th>Vaga Atual</th>
+        <th>Status Tag</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="moto : ${listaMotos}">
+        <td th:text="${moto.id}"></td>
+        <td th:text="${moto.plate}"></td>
+        <td th:text="${moto.motorcycleType}"></td>
+        <td th:text="${moto.chassiNumber}"></td>
+
+        <td th:text="${moto.vaga != null ? moto.vaga.codigo : 'Sem Vaga'}"></td>
+
+        <td th:text="${moto.tag != null ? 'Ativa (' + moto.tag.id + ')' : 'Inativa'}"></td>
+
+        <td>
+            <a th:href="@{'/motorcycles/edit/' + ${moto.id}}">Editar</a>
+            |
+            <a th:href="@{'/motorcycles/delete/' + ${moto.id}}" style="color: #dc3545;" onclick="return confirm('Tem certeza que deseja deletar esta moto?');">Deletar</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div th:if="${motoPage.totalPages > 1}" style="margin-top: 20px; text-align: center;">
+
+    <span>Página <span th:text="${motoPage.number + 1}">1</span> de <span th:text="${motoPage.totalPages}">1</span></span>
+
+    <span th:each="i : ${#numbers.sequence(0, motoPage.totalPages - 1)}">
+        <a th:if="${i != motoPage.number}"
+           th:href="@{/motorcycles(page=${i}, size=${motoPage.size}, plate=${filter != null ? filter.plate : ''}, chassiNumber=${filter != null ? filter.chassiNumber : ''})}"
+           th:text="${i + 1}" style="margin-left: 5px;">
+        </a>
+
+        <span th:unless="${i != motoPage.number}" style="font-weight: bold; margin-left: 5px; color: #007bff;">
+            [[${i + 1}]]
+        </span>
+    </span>
+</div>
+
+<script>
+    document.getElementById('search-form-motos').onsubmit = function() {
+        const form = document.getElementById('search-form-motos');
+
+        // Limpa o campo 'plate'
+        const plateInput = form.querySelector('input[name="plate"]');
+        if (plateInput.value) {
+            plateInput.value = plateInput.value.trim();
+        }
+
+        // Limpa o campo 'chassiNumber'
+        const chassiInput = form.querySelector('input[name="chassiNumber"]');
+        if (chassiInput.value) {
+            chassiInput.value = chassiInput.value.trim();
+        }
+
+        // O formulário será enviado após o JS fazer o 'trim()' nos valores
+        return true;
+    };
+</script>
+</body>
+</html>

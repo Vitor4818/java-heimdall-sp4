@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import montclio.heimdall.dto.MotorcycleDTO.PostMotorcycleDTO;
 import montclio.heimdall.dto.MotorcycleDTO.PutMotorcycleDTO;
 
@@ -21,7 +22,11 @@ public class Motorcycle {
     private String chassiNumber;
     private MotorcycleType motorcycleType;
     @OneToOne(mappedBy = "motorcycle")
+    @ToString.Exclude
     private TagRfId tag;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vaga_id", unique = true)
+    private Vaga vaga;
 
     public Motorcycle(PostMotorcycleDTO motorcycleDTO) {
         this.id = motorcycleDTO.id();

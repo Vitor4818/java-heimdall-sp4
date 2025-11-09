@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Usuários Heimdall</title>
+
+    <style>
+        /* Estilização ORIGINAL */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        h1 {
+            color: #007bff; /* Azul vibrante */
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 12px 15px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        /* Estilo para links de ação */
+        a {
+            color: #28a745; /* Verde para sucesso */
+            text-decoration: none;
+            margin-right: 10px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilo para a mensagem de sucesso */
+        .message-box {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        /* Estilo para a mensagem de ERRO (Adicionado) */
+        .error-box {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        /* Botão de Adicionar */
+        .btn-new {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #dc3545; /* Vermelho para destaque */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn-new:hover {
+            background-color: #c82333;
+        }
+
+        /* Estilos do Formulário de Busca (NOVO) */
+        .search-form input, .search-form button {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .search-form button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-color: #007bff;
+            margin-left: 10px;
+        }
+        .search-form a {
+            margin-left: 10px;
+            color: #dc3545; /* Cor vermelha para limpar */
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<h1>Gerenciamento de Usuários</h1>
+
+<div th:if="${message}" th:text="${message}" class="message-box"></div>
+<div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+<form th:action="@{/users}" method="get" class="search-form" id="search-form">
+    <input type="text"
+           name="name"
+           th:value="${filter != null ? filter.name : ''}"
+           placeholder="Buscar por Nome..."
+           style="width: 150px;">
+
+    <input type="text"
+           name="email"
+           th:value="${filter != null ? filter.email : ''}"
+           placeholder="Buscar por Email..."
+           style="width: 200px;">
+
+    <button type="submit">Buscar</button>
+    <a th:href="@{/users}" style="color: #dc3545;">Limpar Filtros</a>
+</form>
+
+<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+<p><a href="/users/new" class="btn-new">Adicionar Novo Usuário</a></p>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nome Completo</th>
+        <th>Email</th>
+        <th>CPF</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="usuario : ${listaUsuarios}">
+        <td th:text="${usuario.id}"></td>
+        <td th:text="${usuario.name} + ' ' + ${usuario.middleName}"></td>
+        <td th:text="${usuario.email}"></td>
+        <td th:text="${usuario.cpf}"></td>
+        <td>
+            <a th:href="@{'/users/view/' + ${usuario.id}}" style="color: #007bff;">Ver Perfil</a>
+            |
+            <a th:href="@{'/users/edit/' + ${usuario.id}}">Editar</a>
+            |
+            <a th:href="@{'/users/delete/' + ${usuario.id}}" style="color: #dc3545;" onclick="return confirm('Tem certeza?');">Deletar</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div th:if="${userPage.totalPages > 1}" style="margin-top: 20px; text-align: center;">
+
+    <span>Página <span th:text="${userPage.number + 1}">1</span> de <span th:text="${userPage.totalPages}">1</span></span>
+
+    <span th:each="i : ${#numbers.sequence(0, userPage.totalPages - 1)}">
+
+        <a th:if="${i != userPage.number}"
+           th:href="@{/users(page=${i}, size=${userPage.size}, name=${filter.name}, email=${filter.email})}"
+           th:text="${i + 1}" style="margin-left: 5px;">
+        </a>
+
+        <span th:unless="${i != userPage.number}" style="font-weight: bold; margin-left: 5px; color: #007bff;">
+            [[${i + 1}]]
+        </span>
+    </span>
+</div>
+
+<script>
+    document.getElementById('search-form').onsubmit = function() {
+        const form = document.getElementById('search-form');
+
+        // Limpa o campo 'name'
+        const nameInput = form.querySelector('input[name="name"]');
+        if (nameInput.value) {
+            nameInput.value = nameInput.value.trim();
+        }
+
+        // Limpa o campo 'email'
+        const emailInput = form.querySelector('input[name="email"]');
+        if (emailInput.value) {
+            emailInput.value = emailInput.value.trim();
+        }
+
+        // O formulário será enviado após o JS fazer o 'trim()' nos valores
+        return true;
+    };
+</script>
+</body>
+</html>

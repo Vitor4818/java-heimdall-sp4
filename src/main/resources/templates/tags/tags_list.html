@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciamento de Tags RFID - Heimdall</title>
+    <style>
+        /* Estilos base (MANTIDOS) */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f7f9; color: #333; }
+        h1 { color: #007bff; border-bottom: 3px solid #007bff; padding-bottom: 10px; margin-bottom: 25px; }
+        .message-box { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; margin-bottom: 20px; border-radius: 5px; }
+        .error-box { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; margin-bottom: 20px; border-radius: 5px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; background-color: #fff; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #e0e0e0; padding: 12px 15px; text-align: left; }
+        th { background-color: #dc3545; color: white; font-weight: 600; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        a { color: #28a745; text-decoration: none; margin-right: 10px; }
+        .btn-new { display: inline-block; padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-bottom: 15px; }
+
+        /* Estilos do Formulário de Busca (ADICIONADOS) */
+        .search-form input, .search-form button { padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+        .search-form button { background-color: #007bff; color: white; cursor: pointer; border-color: #007bff; margin-left: 10px; }
+        .search-form a { margin-left: 10px; color: #dc3545; text-decoration: none; }
+    </style>
+</head>
+<body>
+<h1>Gerenciamento de Tags RFID</h1>
+
+<div th:if="${message}" th:text="${message}" class="message-box"></div>
+<div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+<form th:action="@{/tags}" method="get" class="search-form" id="search-form">
+    <input type="text"
+           name="frequencia"
+           th:value="${filter != null ? filter.frequencia : ''}"
+           placeholder="Buscar por Frequência..."
+           style="width: 150px;">
+
+    <input type="text"
+           name="aplicacao"
+           th:value="${filter != null ? filter.aplicacao : ''}"
+           placeholder="Buscar por Aplicação..."
+           style="width: 200px;">
+
+    <button type="submit">Buscar</button>
+    <a th:href="@{/tags}" style="color: #dc3545;">Limpar Filtros</a>
+</form>
+
+<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+<p><a href="/tags/new" class="btn-new">Cadastrar Nova Tag</a></p>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Frequência</th>
+        <th>Aplicação</th>
+        <th>Moto Associada (ID/Placa)</th>
+        <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="tag : ${listaTags}">
+        <td th:text="${tag.id}"></td>
+        <td th:text="${tag.frequencia}"></td>
+        <td th:text="${tag.aplicacao}"></td>
+
+        <td th:if="${tag.motorcycle != null}">
+            <span th:text="${tag.motorcycle.id} + ' / ' + ${tag.motorcycle.plate}"></span>
+        </td>
+        <td th:unless="${tag.motorcycle != null}">
+            <span style="color: red;">Não Associada</span>
+        </td>
+
+        <td>
+            <a th:href="@{'/tags/view/' + ${tag.id}}" style="color: #007bff;">Detalhes</a>
+            |
+            <a th:href="@{'/tags/edit/' + ${tag.id}}">Editar</a>
+            |
+            <a th:href="@{'/tags/delete/' + ${tag.id}}" style="color: #dc3545;" onclick="return confirm('Tem certeza?');">Deletar</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div th:if="${tagPage.totalPages > 1}" style="margin-top: 20px; text-align: center;">
+
+    <span>Página <span th:text="${tagPage.number + 1}">1</span> de <span th:text="${tagPage.totalPages}">1</span></span>
+
+    <span th:each="i : ${#numbers.sequence(0, tagPage.totalPages - 1)}">
+
+            <a th:if="${i != tagPage.number}"
+               th:href="@{/tags(page=${i}, size=${tagPage.size}, frequencia=${filter != null ? filter.frequencia : ''}, aplicacao=${filter != null ? filter.aplicacao : ''})}"
+               th:text="${i + 1}" style="margin-left: 5px;">
+            </a>
+
+            <span th:unless="${i != tagPage.number}" style="font-weight: bold; margin-left: 5px; color: #007bff;">
+                [[${i + 1}]]
+            </span>
+        </span>
+</div>
+
+<script>
+    document.getElementById('search-form').onsubmit = function() {
+        const form = document.getElementById('search-form');
+
+        // Limpa o campo 'frequencia'
+        const freqInput = form.querySelector('input[name="frequencia"]');
+        if (freqInput.value) {
+            freqInput.value = freqInput.value.trim();
+        }
+
+        // Limpa o campo 'aplicacao'
+        const aplicInput = form.querySelector('input[name="aplicacao"]');
+        if (aplicInput.value) {
+            aplicInput.value = aplicInput.value.trim();
+        }
+
+        return true;
+    };
+</script>
+</body>
+</html>

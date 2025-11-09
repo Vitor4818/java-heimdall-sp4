@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}"></title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            background-color: #f4f7f9;
+        }
+        h1 {
+            color: #007bff;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+        form {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 450px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 95%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        /* Estilo para campos desabilitados */
+        select:disabled, input:disabled {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+            color: #6c757d;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #dc3545;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .error-box {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        /* Novo estilo para o alerta de Tag ausente */
+        .warning-box {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
+        h2 {
+            color: #28a745;
+            margin-top: 30px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<h1 th:text="${pageTitle}"></h1>
+
+<div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+<form th:action="@{/motorcycles/save}" th:object="${motorcycle}" method="post">
+
+    <input type="hidden" th:field="*{id}" />
+
+    <h2>Detalhes da Moto</h2>
+
+    <label for="plate">Placa:</label>
+    <input type="text" id="plate" th:field="*{plate}" required maxlength="7" />
+
+    <label for="chassiNumber">Número do Chassi:</label>
+    <input type="text" id="chassiNumber" th:field="*{chassiNumber}" required />
+
+    <label for="motorcycleType">Tipo de Moto:</label>
+    <select id="motorcycleType" th:field="*{motorcycleType}" required>
+        <option th:value="${null}">-- Selecione o Tipo --</option>
+
+        <option th:each="enumType : ${T(montclio.heimdall.model.MotorcycleType).values()}"
+                th:value="${enumType}"
+                th:text="${enumType}"
+                th:selected="${enumType} == *{motorcycleType}">
+        </option>
+    </select>
+
+    <hr>
+
+    <h2>Gerenciamento de Pátio</h2>
+
+    <div th:if="*{tag == null}" class="warning-box">
+        ⚠ <strong>Atenção:</strong> Para associar esta moto a uma vaga, primeiro vincule uma <strong>Tag RFID</strong> no menu de Tags.
+    </div>
+
+    <label for="vaga">Vaga Designada:</label>
+
+    <select id="vaga" th:field="*{vaga}" th:disabled="*{tag == null}">
+        <option th:value="${null}">-- Liberar Vaga / Nenhuma --</option>
+
+        <option th:each="v : ${allVagas}"
+                th:value="${v.id}"
+                th:text="${v.codigo} + ' - (' + ${v.ocupada ? 'OCUPADA' : 'LIVRE'} + ')'"
+                th:disabled="${v.ocupada and (motorcycle.vaga == null or v.id != motorcycle.vaga.id)}"
+                th:selected="${motorcycle.vaga != null and v.id == motorcycle.vaga.id}">
+        </option>
+    </select>
+
+    <p style="font-size: 0.8em; color: gray;" th:if="*{tag != null}">* O sistema bloqueará a ocupação de vagas já preenchidas.</p>
+
+    <button type="submit">Salvar Moto</button>
+</form>
+
+<a href="/motorcycles" class="back-link">Voltar para a lista</a>
+
+</body>
+</html>

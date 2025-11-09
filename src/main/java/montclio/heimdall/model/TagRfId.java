@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import montclio.heimdall.dto.TagRfidDTO.PostTagRfidDTO;
 import montclio.heimdall.dto.TagRfidDTO.PutTagRfidDTO;
 
@@ -22,6 +23,7 @@ public class TagRfId {
     private String aplicacao;
     @OneToOne
     @JoinColumn(name = "motorcycle_id", referencedColumnName = "id", unique = true)
+    @ToString.Exclude
     private Motorcycle motorcycle;
 
     // Construtor que recebe um DTO para criação

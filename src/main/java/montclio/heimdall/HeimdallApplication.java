@@ -6,7 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 
 @SpringBootApplication
 @EnableCaching
-public class HeimdallApplication {
+public class  HeimdallApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(HeimdallApplication.class, args);

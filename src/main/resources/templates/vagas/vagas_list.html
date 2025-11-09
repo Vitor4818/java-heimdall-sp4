@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciamento de Vagas</title>
+    <style>
+        /* Estilos básicos para consistência */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f7f9; }
+        h1 { color: #28a745; border-bottom: 3px solid #28a745; padding-bottom: 10px; margin-bottom: 25px; }
+        table { width: 90%; /* Aumentei um pouco a largura para caber a nova coluna */ border-collapse: collapse; background-color: #fff; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden; margin-top: 20px; }
+        th, td { border: 1px solid #e0e0e0; padding: 12px 15px; text-align: left; }
+        th { background-color: #28a745; color: white; font-weight: 600; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        a { color: #007bff; text-decoration: none; margin-right: 10px; }
+        .btn-new { display: inline-block; padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; margin-bottom: 15px; }
+        .status-occupied { background-color: #dc3545; color: white; padding: 5px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }
+        .status-free { background-color: #28a745; color: white; padding: 5px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9em; }
+        .error-box { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; margin-bottom: 20px; border-radius: 5px; }
+        .message-box { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 10px; margin-bottom: 20px; border-radius: 5px; }
+        .search-form input, .search-form select, .search-form button { padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+
+        /* Estilo para a placa da moto */
+        .moto-plate { font-weight: bold; color: #333; background-color: #e9ecef; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+<div th:if="${message}" th:text="${message}" class="message-box"></div>
+<div th:if="${error}" th:text="${error}" class="error-box"></div>
+
+<h1>Gerenciamento de Vagas de Pátio</h1>
+
+<form th:action="@{/vagas}" method="get" class="search-form" id="search-form-vaga">
+    <input type="text"
+           name="codigo"
+           th:value="${filter != null ? filter.codigo : ''}"
+           placeholder="Buscar por Código..."
+           style="width: 150px;">
+
+    <select name="zonaId">
+        <option th:value="null">-- Todas as Zonas --</option>
+        <option th:each="zona : ${allZonas}"
+                th:value="${zona.id}"
+                th:text="${zona.nome}"
+                th:selected="${filter != null and filter.zonaId == zona.id}">
+        </option>
+    </select>
+
+    <select name="isOccupied">
+        <option th:value="null">-- Status (Livre/Ocupada) --</option>
+        <option value="true" th:selected="${filter != null and filter.isOccupied == true}">Ocupada</option>
+        <option value="false" th:selected="${filter != null and filter.isOccupied == false}">Livre</option>
+    </select>
+
+    <button type="submit">Filtrar</button>
+    <a th:href="@{/vagas}" style="color: #dc3545;">Limpar Filtros</a>
+</form>
+<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+<p><a href="/vagas/new" class="btn-new">Cadastrar Nova Vaga</a></p>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Código</th>
+        <th>Zona</th>
+        <th>Status</th>
+        <th>Moto</th> <th>Ações</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="vaga : ${listaVagas}">
+        <td th:text="${vaga.id}"></td>
+        <td th:text="${vaga.codigo}"></td>
+        <td th:text="${vaga.zona.nome}"></td>
+        <td>
+            <span th:class="${vaga.ocupada ? 'status-occupied' : 'status-free'}"
+                  th:text="${vaga.ocupada ? 'OCUPADA' : 'LIVRE'}">
+            </span>
+        </td>
+
+        <td>
+            <span th:if="${vaga.moto != null}" class="moto-plate"
+                  th:text="${vaga.moto.plate}"></span>
+            <span th:unless="${vaga.moto != null}" style="color: #ccc;">---</span>
+        </td>
+
+        <td>
+            <a th:href="@{'/vagas/edit/' + ${vaga.id}}">Editar</a>
+            |
+            <a th:href="@{'/vagas/delete/' + ${vaga.id}}" style="color: #dc3545;" onclick="return confirm('Tem certeza?');">Deletar</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div th:if="${vagaPage.totalPages > 1}" style="margin-top: 20px; text-align: center;">
+    <span>Página <span th:text="${vagaPage.number + 1}">1</span> de <span th:text="${vagaPage.totalPages}">1</span></span>
+
+    <span th:each="i : ${#numbers.sequence(0, vagaPage.totalPages - 1)}">
+            <a th:if="${i != vagaPage.number}"
+               th:href="@{/vagas(page=${i}, size=${vagaPage.size}, codigo=${filter.codigo}, zonaId=${filter.zonaId}, isOccupied=${filter.isOccupied})}"
+               th:text="${i + 1}" style="margin-left: 5px;">
+            </a>
+            <span th:unless="${i != vagaPage.number}" style="font-weight: bold; margin-left: 5px; color: #007bff;">
+                [[${i + 1}]]
+            </span>
+        </span>
+</div>
+
+<script>
+    document.getElementById('search-form-vaga').onsubmit = function() {
+        const form = document.getElementById('search-form-vaga');
+        const codigoInput = form.querySelector('input[name="codigo"]');
+        if (codigoInput.value) {
+            codigoInput.value = codigoInput.value.trim();
+        }
+        return true;
+    };
+</script>
+</body>
+</html>

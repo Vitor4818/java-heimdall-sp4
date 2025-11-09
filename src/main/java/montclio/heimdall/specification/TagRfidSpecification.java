@@ -3,7 +3,7 @@ package montclio.heimdall.specification;
 import jakarta.persistence.criteria.Predicate;
 import montclio.heimdall.dto.TagRfidDTO.TagRfidFilter;
 import montclio.heimdall.model.TagRfId;
-import montclio.heimdall.constants.TagRfIdFields;
+import montclio.heimdall.constants.TagRfIdFields; // Assumindo que TagRfIdFields existe
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
@@ -15,28 +15,34 @@ public class TagRfidSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // Filtro por frequência
-            Optional.ofNullable(filter.frequencia())
-                    .map(String::toLowerCase)
-                    .ifPresent(frequencia -> predicates.add(
-                            cb.like(cb.lower(root.get(TagRfIdFields.FREQUENCIA)), "%" + frequencia + "%")
-                    ));
+            // 1. Filtro por frequência
+            String freq = filter.frequencia();
+            if (freq != null && !freq.trim().isEmpty()) {
+                String valor = freq.trim().toLowerCase();
+                predicates.add(
+                        cb.like(cb.lower(root.get(TagRfIdFields.FREQUENCIA)), "%" + valor + "%")
+                );
+            }
 
-            // Filtro por banda
-            Optional.ofNullable(filter.banda())
-                    .map(String::toLowerCase)
-                    .ifPresent(banda -> predicates.add(
-                            cb.like(cb.lower(root.get(TagRfIdFields.BANDA)), "%" + banda + "%")
-                    ));
+            // 2. Filtro por banda
+            String banda = filter.banda();
+            if (banda != null && !banda.trim().isEmpty()) {
+                String valor = banda.trim().toLowerCase();
+                predicates.add(
+                        cb.like(cb.lower(root.get(TagRfIdFields.BANDA)), "%" + valor + "%")
+                );
+            }
 
-            // Filtro por aplicação
-            Optional.ofNullable(filter.aplicacao())
-                    .map(String::toLowerCase)
-                    .ifPresent(aplicacao -> predicates.add(
-                            cb.like(cb.lower(root.get(TagRfIdFields.APLICACAO)), "%" + aplicacao + "%")
-                    ));
+            // 3. Filtro por aplicação
+            String aplicacao = filter.aplicacao();
+            if (aplicacao != null && !aplicacao.trim().isEmpty()) {
+                String valor = aplicacao.trim().toLowerCase();
+                predicates.add(
+                        cb.like(cb.lower(root.get(TagRfIdFields.APLICACAO)), "%" + valor + "%")
+                );
+            }
 
-            // Filtro por ID da moto relacionada
+            // 4. Filtro por ID da moto relacionada
             Optional.ofNullable(filter.motorcycleId())
                     .ifPresent(motoId -> predicates.add(
                             cb.equal(root.get(TagRfIdFields.MOTORCYCLE).get("id"), motoId)

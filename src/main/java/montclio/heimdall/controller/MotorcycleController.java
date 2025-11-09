@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/motorcycles")
+@RequestMapping("/api/motorcycles")
 @Tag(name = "Motorcycles", description = "Gerencia motos cadastradas no sistema")
 public class MotorcycleController {
 
