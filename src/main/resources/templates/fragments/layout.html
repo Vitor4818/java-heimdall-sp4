@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" th:fragment="layout (title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${title}">Heimdall - Gerenciamento</title>
+
+    <style th:replace="~{fragments/menu :: menu-css}"></style>
+</head>
+<body>
+
+<div th:replace="~{fragments/menu :: header}"></div>
+
+<div class="main-content">
+    <div th:replace="${content}">
+        <p>Carregando conteúdo...</p>
+    </div>
+</div>
+
+<footer style="text-align: center; padding: 25px; color: var(--secondary); margin-top: 60px; border-top: 2px solid var(--dark-hover);">
+    <p style="margin: 0; font-size: 0.9em;">
+        &copy; 2025 <strong>HEIMDALL System</strong>. Todos os direitos reservados.
+    </p>
+</footer>
+
+</body>
+</html>

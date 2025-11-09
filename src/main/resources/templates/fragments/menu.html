@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<body>
+<style th:fragment="menu-css">
+    :root {
+        /* --- PALETA NEON NIGHTS --- */
+        --bg-main: #1c0b2b;         /* Fundo da página (Mais escuro) */
+        --panel-bg: #2d2438;        /* Era #2a163d - Agora um pouco mais leve/neutro */
+         --input-bg: #3b304a;        /* Era #382255 - Acompanha o painel */
+        --border-color: #4c3a6e;    /* Bordas sutis */
+
+        --primary: #6f95ff;         /* Azul Neon (Ação Principal/Links) - Ajustado para vibrar no escuro */
+        --secondary: #a997c5;       /* Roxo claro (Textos secundários) */
+        --accent: #5c65c0;          /* Roxo vibrante (Botões/Destaques) */
+
+        --text-primary: #ffffff;    /* Texto principal */
+        --text-secondary: #dcdcdc;  /* Texto secundário */
+
+        /* Funcionais */
+        --success: #00b894;         /* Verde neon */
+        --danger: #ff7675;          /* Vermelho suave */
+        --warning: #fdcb6e;         /* Amarelo */
+    }
+
+    body {
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        margin: 0;
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        line-height: 1.5;
+        background-image: radial-gradient(circle at top right, #301c41 0%, var(--bg-main) 70%);
+        min-height: 100vh;
+    }
+
+    h1 {
+        color: var(--primary);
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+        font-weight: 300;
+        letter-spacing: 1px;
+    }
+
+    h2 {
+        color: var(--secondary);
+        margin-top: 30px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 8px;
+    }
+
+    /* --- NAVBAR --- */
+    .navbar {
+        background-color: rgba(28, 11, 43, 0.8);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        padding: 0 25px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    .navbar a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        padding: 18px 20px;
+        display: inline-block;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        font-size: 0.95em;
+        letter-spacing: 0.5px;
+    }
+    .navbar a:hover {
+        color: var(--primary);
+        background-color: rgba(255,255,255,0.03);
+    }
+    .navbar .brand {
+        font-weight: 900;
+        font-size: 1.5em;
+        color: var(--primary) !important;
+        letter-spacing: 2px;
+        text-shadow: 0 0 15px rgba(111, 149, 255, 0.3);
+    }
+
+    /* --- MAIN CONTENT (O Painel) --- */
+    .main-content {
+        max-width: 1100px;
+        margin: 40px auto;
+        background: var(--panel-bg); /* Fundo escuro para o painel */
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        border: 1px solid var(--border-color);
+    }
+
+    /* --- TABELAS --- */
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 25px;
+        border-radius: 12px;
+        overflow: hidden;
+        background-color: rgba(0,0,0,0.2);
+    }
+    th {
+        background-color: rgba(92, 101, 192, 0.2); /* Accent com transparência */
+        color: var(--primary);
+        padding: 18px;
+        text-align: left;
+        text-transform: uppercase;
+        font-size: 0.8em;
+        letter-spacing: 1.2px;
+        font-weight: 700;
+    }
+    td {
+        padding: 18px;
+        border-top: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }
+    tr:hover td {
+        background-color: rgba(111, 149, 255, 0.05);
+        color: var(--text-primary);
+    }
+
+    /* --- FORMULÁRIOS --- */
+    form {
+        background-color: rgba(0,0,0,0.2);
+        padding: 35px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        max-width: 550px;
+    }
+    label {
+        font-weight: 600;
+        margin-top: 25px;
+        display: block;
+        color: var(--secondary);
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    input[type="text"], input[type="number"], input[type="password"], input[type="email"], select {
+        width: 100%;
+        padding: 14px 16px;
+        margin-top: 10px;
+        background-color: var(--input-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 16px;
+        color: var(--text-primary);
+        transition: all 0.3s;
+        box-sizing: border-box;
+    }
+    input:focus, select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 15px rgba(111, 149, 255, 0.2);
+    }
+    /* Ajuste para placeholders em inputs escuros */
+    ::placeholder { color: rgba(255,255,255,0.3); }
+
+    /* --- BOTÕES & LINKS --- */
+    .btn, button[type="submit"] {
+        display: inline-block; font-weight: 700; text-align: center;
+        padding: 14px 28px; border-radius: 8px; border: none; cursor: pointer;
+        transition: all 0.3s; text-decoration: none;
+        color: #fff;
+        background: linear-gradient(135deg, var(--accent), var(--primary));
+        box-shadow: 0 4px 15px rgba(92, 101, 192, 0.3);
+        text-transform: uppercase;
+        font-size: 0.9em;
+        letter-spacing: 1px;
+    }
+    button[type="submit"] { margin-top: 40px; width: 100%; }
+    .btn:hover, button[type="submit"]:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(111, 149, 255, 0.4);
+    }
+    .btn-new {
+        background: linear-gradient(135deg, #198754, #20c997);
+        box-shadow: 0 4px 15px rgba(32, 201, 151, 0.2);
+    }
+    .btn-danger { background: var(--danger) !important; box-shadow: none !important; }
+
+    a.action-link { color: var(--primary); font-weight: 600; text-decoration: none; margin-right: 15px; transition: all 0.2s; }
+    a.action-link:hover { color: var(--white); text-shadow: 0 0 8px var(--primary); }
+    a.delete { color: var(--danger); opacity: 0.8; }
+    a.delete:hover { opacity: 1; color: #ffadad; text-shadow: 0 0 8px rgba(220, 53, 69, 0.5); }
+
+    .back-link {
+        display: inline-block; margin-top: 30px;
+        color: var(--secondary); text-decoration: none; font-weight: 600;
+        transition: color 0.3s;
+    }
+    .back-link:hover { color: var(--primary); }
+
+    /* --- ALERTA & STATUS --- */
+    .message-box { background: rgba(0, 184, 148, 0.15); color: #55efc4; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid rgba(0, 184, 148, 0.3); }
+    .error-box { background: rgba(255, 118, 117, 0.15); color: #ff7675; padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid rgba(255, 118, 117, 0.3); }
+
+    .status-occupied { background: rgba(220, 53, 69, 0.2); color: #ff6b6b; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 700; border: 1px solid rgba(220, 53, 69, 0.4); }
+    .status-free { background: rgba(25, 135, 84, 0.2); color: #55efc4; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 700; border: 1px solid rgba(25, 135, 84, 0.4); }
+
+    /* --- BUSCA --- */
+    .search-form {
+        display: flex; gap: 15px; align-items: center;
+        background: rgba(0,0,0,0.2); padding: 20px;
+        border-radius: 12px; margin-bottom: 30px;
+        border: 1px solid var(--border-color);
+        max-width: 100%;
+    }
+    .search-form input, .search-form select { margin-top: 0; background: var(--input-bg); }
+    .search-form button { width: auto; margin-top: 0; padding: 12px 30px; }
+    .search-form a { color: var(--secondary); margin-left: 15px; }
+    .search-form a:hover { color: var(--danger); }
+
+    /* --- PAGINAÇÃO --- */
+    .pagination-container { margin-top: 40px; text-align: center; }
+    .btn-page {
+        padding: 10px 16px; margin: 0 4px;
+        background-color: var(--input-bg);
+        color: var(--secondary);
+        border-radius: 8px; font-weight: bold;
+        border: 1px solid var(--border-color);
+        text-decoration: none; transition: all 0.3s;
+    }
+    .btn-page:hover {
+        background-color: var(--primary);
+        color: var(--bg-main);
+        box-shadow: 0 0 15px rgba(111, 149, 255, 0.4); border-color: var(--primary);
+    }
+    .btn-page-current {
+        padding: 10px 16px; margin: 0 4px;
+        background-color: var(--primary);
+        color: var(--bg-main);
+        border-radius: 8px; font-weight: bold;
+        box-shadow: 0 0 20px rgba(111, 149, 255, 0.3);
+    }
+
+    /* --- RODAPÉ --- */
+    .footer { text-align: center; padding: 30px; color: var(--secondary); margin-top: 80px; border-top: 1px solid var(--border-color); font-size: 0.9em; }
+</style>
+
+<header th:fragment="header">
+    <div class="navbar">
+        <div class="navbar-left">
+            <a th:href="@{/}" class="brand">⚡ HEIMDALL</a>
+            <a th:href="@{/users}">Usuários</a>
+            <a th:href="@{/motorcycles}">Motos</a>
+            <a th:href="@{/tags}">Tags</a>
+            <a th:href="@{/zonas}">Zonas</a>
+            <a th:href="@{/vagas}">Vagas</a>
+        </div>
+        <div class="navbar-right">
+            <span style="color: var(--secondary); margin-right: 20px; font-size: 0.9em; letter-spacing: 1px;">[ ADMIN ]</span>
+            <a th:href="@{/logout}" style="background: rgba(220, 53, 69, 0.2); color: #ff7675; padding: 8px 18px; border-radius: 6px; font-size: 14px; border: 1px solid rgba(220, 53, 69, 0.3);">Sair</a>
+        </div>
+    </div>
+</header>
+</body>
+</html>
