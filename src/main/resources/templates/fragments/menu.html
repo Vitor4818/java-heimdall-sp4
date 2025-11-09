@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <body>
 <style th:fragment="menu-css">
     :root {
@@ -248,14 +248,14 @@
     <div class="navbar">
         <div class="navbar-left">
             <a th:href="@{/}" class="brand">⚡ HEIMDALL</a>
-            <a th:href="@{/users}">Usuários</a>
+            <a th:href="@{/users}" sec:authorize="hasAuthority('ADMIN')">Usuários</a>
             <a th:href="@{/motorcycles}">Motos</a>
             <a th:href="@{/tags}">Tags</a>
             <a th:href="@{/zonas}">Zonas</a>
             <a th:href="@{/vagas}">Vagas</a>
         </div>
         <div class="navbar-right">
-            <span style="color: var(--secondary); margin-right: 20px; font-size: 0.9em; letter-spacing: 1px;">[ ADMIN ]</span>
+            <a th:href="@{/profile}" class="auth-status">Meu Perfil</a>
             <a th:href="@{/logout}" style="background: rgba(220, 53, 69, 0.2); color: #ff7675; padding: 8px 18px; border-radius: 6px; font-size: 14px; border: 1px solid rgba(220, 53, 69, 0.3);">Sair</a>
         </div>
     </div>

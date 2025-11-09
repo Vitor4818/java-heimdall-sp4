@@ -25,7 +25,7 @@ public class UserCategory {
     @NotBlank
     private String category;
     @OneToMany(mappedBy = "userCategory")
-    @ToString.Exclude // <--- CORREÇÃO CRÍTICA: Quebra o loop aqui!
+    @ToString.Exclude
     @JsonIgnore
     private List<User> users;
 }

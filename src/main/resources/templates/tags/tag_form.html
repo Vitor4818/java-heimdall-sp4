@@ -1,63 +1,44 @@
 <!DOCTYPE html>
-<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${pageTitle}"></title>
-    <style>
-        /* Estilos básicos (os mesmos dos outros forms) */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f7f9; }
-        h1 { color: #007bff; border-bottom: 3px solid #007bff; padding-bottom: 10px; margin-bottom: 25px; }
-        form { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 400px; }
-        label { display: block; margin-top: 10px; font-weight: 600; color: #555; }
-        input[type="text"], select {
-            width: 95%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 20px; font-size: 16px; }
-        button:hover { background-color: #0056b3; }
-        .back-link { display: block; margin-top: 20px; color: #007bff; text-decoration: none; }
-        .error-box { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 10px; margin-bottom: 20px; border-radius: 5px; font-weight: bold; }
-    </style>
-</head>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (title=${pageTitle}, content=~{::#conteudo})}">
+<head></head>
 <body>
-<h1 th:text="${pageTitle}"></h1>
+<div id="conteudo">
 
-<div th:if="${error}" th:text="${error}" class="error-box"></div>
+    <h1 th:text="${pageTitle}"></h1>
 
-<form th:action="@{/tags/save}" th:object="${tag}" method="post">
+    <div th:if="${error}" th:text="${error}" class="error-box"></div>
 
-    <input type="hidden" th:field="*{id}" />
+    <form th:action="@{/tags/save}" th:object="${tag}" method="post">
 
-    <label for="frequencia">Frequência (ex: UHF):</label>
-    <input type="text" id="frequencia" th:field="*{frequencia}" required />
+        <input type="hidden" th:field="*{id}" />
 
-    <label for="banda">Banda:</label>
-    <input type="text" id="banda" th:field="*{banda}" required />
+        <label for="frequencia">Frequência (ex: UHF):</label>
+        <input type="text" id="frequencia" th:field="*{frequencia}" required />
 
-    <label for="aplicacao">Aplicação:</label>
-    <input type="text" id="aplicacao" th:field="*{aplicacao}" required />
+        <label for="banda">Banda:</label>
+        <input type="text" id="banda" th:field="*{banda}" required />
 
-    <hr>
+        <label for="aplicacao">Aplicação:</label>
+        <input type="text" id="aplicacao" th:field="*{aplicacao}" required />
 
-    <label for="motorcycle">Associar à Moto:</label>
-    <select id="motorcycle" th:field="*{motorcycle}">
-        <option value="">-- Desvincular / Nenhuma Moto --</option>
+        <hr style="border-color: var(--border-light); margin: 30px 0;">
 
-        <option th:each="moto : ${allMotorcycles}"
-                th:value="${moto.id}"
-                th:text="${moto.plate} + ' (' + ${moto.chassiNumber} + ')'"
+        <label for="motorcycle">Associar à Moto:</label>
+        <select id="motorcycle" th:field="*{motorcycle}">
+            <option value="">-- Desvincular / Nenhuma Moto --</option>
+            <option th:each="moto : ${allMotorcycles}"
+                    th:value="${moto.id}"
+                    th:text="${moto.plate} + ' (' + ${moto.motorcycleType} + ')'"
+                    th:selected="${tag.motorcycle != null and tag.motorcycle.id == moto.id}">
+            </option>
+        </select>
 
-                th:selected="${tag.motorcycle != null and tag.motorcycle.id == moto.id}">
-        </option>
-    </select>
+        <button type="submit">Salvar Tag</button>
+    </form>
 
-    <button type="submit">Salvar Tag</button>
-</form>
+    <a th:href="@{/tags}" class="back-link">← Voltar para a lista</a>
 
-<a href="/tags" class="back-link">Voltar para a lista</a>
-
+</div>
 </body>
 </html>

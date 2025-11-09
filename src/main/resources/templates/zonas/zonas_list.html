@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{fragments/layout :: layout (title='Gerenciamento de Zonas', content=~{::#conteudo})}">
 <head></head>
 <body>
@@ -20,7 +21,7 @@
             <th>ID</th>
             <th>Nome da Zona</th>
             <th>Tipo</th>
-            <th>Ações</th>
+            <th sec:authorize="hasAuthority('ADMIN')">Ações</th>
         </tr>
         </thead>
         <tbody>
@@ -32,7 +33,8 @@
                           style="background-color: var(--border-light); padding: 3px 8px; border-radius: 12px; font-size: 0.9em;">
                     </span>
             </td>
-            <td>
+
+            <td sec:authorize="hasAuthority('ADMIN')">
                 <a th:href="@{'/zonas/edit/' + ${zona.id}}" class="action-link">Editar</a>
             </td>
         </tr>

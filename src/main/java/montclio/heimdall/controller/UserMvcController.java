@@ -55,7 +55,7 @@ public class UserMvcController {
         try {
             User user = userService.findById(id);
             model.addAttribute("user", user);
-            model.addAttribute("pageTitle", "Detalhes do Usuário (ID: " + id + ")");
+            model.addAttribute("pageTitle   ", "Detalhes do Usuário (ID: " + id + ")");
             return "users/user_details";
 
         } catch (ResourceNotFoundException e) {
@@ -89,16 +89,28 @@ public class UserMvcController {
 
     // CREATE / UPDATE (Processar Dados do Formulário)
     @PostMapping("/save")
-    public String salvarOuAtualizarUsuario(User user, RedirectAttributes ra) {
-        String urlDeErro = (user.getId() == null) ? "redirect:/users/new" : "redirect:/users/edit/" + user.getId();
+    public String salvarOuAtualizarUsuario(User user, Model model, RedirectAttributes ra) {
         try {
+            // O Service cuida de tudo (validação, criptografia, update/create)
             userService.save(user);
+
             ra.addFlashAttribute("message", "Usuário salvo com sucesso!");
             return "redirect:/users";
 
         } catch (DataConflictException | ResourceNotFoundException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-            return urlDeErro;
+
+            // 1. Passa o erro para a View atual
+            model.addAttribute("error", e.getMessage());
+
+            // 2. Devolve o objeto 'user' preenchido para não perder o que foi digitado
+            model.addAttribute("user", user);
+
+            // 3. Define o título novamente
+            String pageTitle = (user.getId() == null) ? "Cadastrar Novo Usuário" : "Editar Usuário (ID: " + user.getId() + ")";
+            model.addAttribute("pageTitle", pageTitle);
+
+            // 4. Retorna a View diretamente (mantém os dados na tela)
+            return "users/user_form";
         }
     }
 

@@ -127,50 +127,65 @@ public class UserService {
     @CacheEvict(value = {"users", "userById"}, allEntries = true)
     public User save(User user) {
 
+        // 1. LIMPEZA DE DADOS (Trim)
         String emailLimpo = user.getEmail() != null ? user.getEmail().trim() : null;
         String cpfLimpo = user.getCpf() != null ? user.getCpf().trim() : null;
         user.setEmail(emailLimpo);
         user.setCpf(cpfLimpo);
 
-        String senhaExistenteHash;
-
         if (user.getId() == null) {
-            senhaExistenteHash = user.getPassword();
+            // --- CRIAÇÃO (NEW) ---
 
-            //VALIDAÇÃO DE CRIAÇÃO: E-MAIL e CPF devem ser únicos.
+            // Validação de Unicidade
             if (userRepository.existsByEmail(emailLimpo)) {
-                throw new DataConflictException("Esse e-mail já está sendo usado por outro usuário");
+                throw new DataConflictException("Esse e-mail já está sendo usado por outro usuário.");
             }
             if (userRepository.existsByCpf(cpfLimpo)) {
-                throw new DataConflictException("Esse CPF já está cadastrado");
+                throw new DataConflictException("Esse CPF já está cadastrado.");
             }
+
+            // CRIPTOGRAFIA (Obrigatória na criação)
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         } else {
+            // --- EDIÇÃO (UPDATE) ---
 
             User existingUser = userRepository.findById(user.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuário com ID " + user.getId() + " não encontrado para atualização."));
-            senhaExistenteHash = existingUser.getPassword();
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado para atualização."));
 
-            // VALIDAÇÃO DE EDIÇÃO: E-MAIL e CPF devem ser únicos, exceto para o ID atual.
+            // Validação de Unicidade (ignorando o próprio ID)
             if (userRepository.existsByEmailAndIdNot(emailLimpo, user.getId())) {
-                throw new DataConflictException("Esse e-mail já está sendo usado por outro usuário");
+                throw new DataConflictException("Esse e-mail já está sendo usado por outro usuário.");
             }
             if (userRepository.existsByCpfAndIdNot(cpfLimpo, user.getId())) {
-                throw new DataConflictException("Esse CPF já está cadastrado");
+                throw new DataConflictException("Esse CPF já está cadastrado.");
             }
 
+            // Lógica de Senha na Edição:
             if (user.getPassword() == null || user.getPassword().isEmpty()) {
-                user.setPassword(senhaExistenteHash);
+                // Se veio vazia no formulário, mantém a antiga (já criptografada)
+                user.setPassword(existingUser.getPassword());
+            } else {
+                // Se o usuário digitou uma NOVA senha, criptografa ela agora
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
             }
         }
 
+        // 3. Persistência
         return userRepository.save(user);
     }
+
     public User findAndPrepareForEdit(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário com ID " + id + " não encontrado."));
         user.setPassword(null);
         return user;
+    }
+
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário logado não encontrado no banco."));
     }
 
 

@@ -1,51 +1,84 @@
 <!DOCTYPE html>
-<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${pageTitle}"></title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 40px; background-color: #f4f7f9; }
-        h1 { color: #007bff; border-bottom: 3px solid #007bff; padding-bottom: 10px; margin-bottom: 25px; }
-        .detail-box { background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 400px; }
-        .detail-item { margin-bottom: 15px; }
-        .detail-label { font-weight: 600; color: #555; display: block; margin-bottom: 5px; }
-        .detail-value { padding-left: 10px; border-left: 3px solid #dc3545; }
-        .back-link { display: block; margin-top: 30px; color: #007bff; text-decoration: none; }
-        .tag-status { background-color: #ffc107; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
-    </style>
-</head>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: layout (title=${pageTitle}, content=~{::#conteudo})}">
+<head></head>
 <body>
-<h1 th:text="${pageTitle}"></h1>
+<div id="conteudo">
 
-<div class="detail-box" th:object="${tag}">
-    <div class="detail-item">
-        <span class="detail-label">ID da Tag:</span>
-        <span class="detail-value" th:text="*{id}"></span>
-    </div>
-    <div class="detail-item">
-        <span class="detail-label">Frequência:</span>
-        <span class="detail-value" th:text="*{frequencia}"></span>
-    </div>
-    <div class="detail-item">
-        <span class="detail-label">Banda:</span>
-        <span class="detail-value" th:text="*{banda}"></span>
-    </div>
-    <div class="detail-item">
-        <span class="detail-label">Aplicação:</span>
-        <span class="detail-value" th:text="*{aplicacao}"></span>
+    <style>
+        #conteudo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* Reutiliza o estilo da caixa de detalhes do user_details */
+        .detail-container {
+            background-color: var(--bg-panel); padding: 35px;
+            border-radius: 12px; border: 1px solid var(--border-light);
+            width: 100%; max-width: 500px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            border-top: 4px solid var(--danger); /* Vermelho para Tag */
+            text-align: left;
+        }
+        .detail-item { margin-bottom: 20px; display: flex; flex-direction: column; }
+        .detail-label {
+            font-weight: 700; color: var(--secondary); display: block;
+            margin-bottom: 8px; text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.5px;
+        }
+        .detail-value {
+            padding: 10px 15px; background-color: var(--bg-body);
+            border-left: 4px solid var(--danger); /* Vermelho para Tag */
+            border-radius: 4px; font-size: 1.1em; color: var(--text-main);
+        }
+        .tag-status {
+            background-color: var(--warning); color: #333; padding: 5px 10px;
+            border-radius: 4px; font-weight: bold; display: inline-block;
+        }
+        .tag-status.inactive { background-color: var(--border-light); color: var(--text-muted); }
+
+        .actions-container { margin-top: 30px; display: flex; gap: 20px; align-items: center; }
+    </style>
+
+    <h1 th:text="${pageTitle}" style="align-self: flex-start; width: 100%; max-width: 500px; margin: 0 auto 25px auto; border-bottom-color: var(--danger);"></h1>
+
+    <div class="detail-container" th:object="${tag}">
+        <div class="detail-item">
+            <span class="detail-label">ID da Tag:</span>
+            <span class="detail-value" th:text="*{id}"></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Frequência:</span>
+            <span class="detail-value" th:text="*{frequencia}"></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Banda:</span>
+            <span class="detail-value" th:text="*{banda}"></span>
+        </div>
+        <div class="detail-item">
+            <span class="detail-label">Aplicação:</span>
+            <span class="detail-value" th:text="*{aplicacao}"></span>
+        </div>
+
+        <hr style="border-color: var(--border-light); margin: 25px 0;">
+
+        <div class="detail-item">
+            <span class="detail-label">Moto Associada:</span>
+            <span th:if="*{motorcycle != null}"
+                  class="tag-status"
+                  th:text="*{motorcycle.plate} + ' (' + *{motorcycle.chassiNumber} + ')'">
+                </span>
+            <span th:unless="*{motorcycle != null}"
+                  class="tag-status inactive">
+                    Nenhuma Moto Associada
+                </span>
+        </div>
     </div>
 
-    <hr>
-
-    <div class="detail-item">
-        <span class="detail-label">Moto Associada:</span>
-        <span class="tag-status" th:if="*{motorcycle != null}"
-              th:text="*{motorcycle.plate} + ' (' + *{motorcycle.chassiNumber} + ')'"></span>
-        <span class="tag-status" th:unless="*{motorcycle != null}" style="background-color: #eee; color: #888;">Nenhuma Moto Associada</span>
+    <div class="actions-container">
+        <a th:href="@{'/tags/edit/' + ${tag.id}}" class="btn">Editar Tag</a>
+        <a href="/tags" class="back-link" style="margin-top: 0;">← Voltar para a lista</a>
     </div>
+
 </div>
-
-<a th:href="@{'/tags/edit/' + ${tag.id}}" class="back-link" style="color: #28a745;">Editar Tag</a>
-<a href="/tags" class="back-link">Voltar para a lista</a>
 </body>
 </html>

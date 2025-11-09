@@ -1,45 +1,59 @@
 <!DOCTYPE html>
 <html lang="pt-br" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{fragments/layout :: layout (title=${pageTitle}, content=~{::#conteudo})}">
-<head></head>
+<head>
+</head>
 <body>
 <div id="conteudo">
 
-    <h1 th:text="${pageTitle}"></h1>
+    <h1 th:text="${pageTitle}" style="align-self: flex-start; max-width: 550px; margin: 0 auto 25px auto;"></h1>
 
-    <div th:if="${error}" th:text="${error}" class="error-box"></div>
+    <div th:if="${error}" th:text="${error}" class="error-box" style="max-width: 550px; margin: 0 auto 20px auto;"></div>
 
-    <div class="detail-container" style="background-color: var(--bg-panel); padding: 35px; border-radius: 12px; border: 1px solid var(--border-light); max-width: 550px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-top: 4px solid var(--primary);">
+    <div class="detail-container" th:object="${user}"
+         style="background-color: var(--panel-bg); padding: 35px; border-radius: 12px; border: 1px solid var(--border-light); max-width: 550px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-top: 4px solid var(--primary); margin: 0 auto;">
 
-        <div class="detail-item" th:object="${user}">
+        <div class="detail-item">
             <label style="margin-top: 0;">ID:</label>
-            <p class="detail-value" th:text="*{id}" style="font-size: 1.1em; margin-bottom: 15px;"></p>
-
-            <label>Categoria (Permissão):</label>
-            <p class="detail-value" th:if="*{userCategory != null}"
-               th:text="*{userCategory.category}"
-               style="font-size: 1.1em; margin-bottom: 15px; color: var(--warning); font-weight: bold;">
-            </p>
-
-            <label>Nome Completo:</label>
-            <p class="detail-value" th:text="*{name} + ' ' + *{middleName}" style="font-size: 1.1em; margin-bottom: 15px;"></p>
-
-            <label>Email:</label>
-            <p class="detail-value" th:text="*{email}" style="font-size: 1.1em; margin-bottom: 15px;"></p>
-
-            <label>CPF:</label>
-            <p class="detail-value" th:text="*{cpf}" style="font-size: 1.1em; margin-bottom: 15px;"></p>
-
-            <div th:if="*{birthday != null}">
-                <label>Data de Nascimento:</label>
-                <p class="detail-value" th:text="*{#temporals.format(birthday, 'dd/MM/yyyy')}" style="font-size: 1.1em; margin-bottom: 15px;"></p>
-            </div>
+            <p class="detail-value" th:text="*{id}"></p>
         </div>
 
-        <a th:href="@{'/users/edit/' + ${user.id}}" class="btn" style="width: 100%; display: block; text-align: center; margin-top: 30px;">Editar Usuário</a>
+        <div class="detail-item" th:if="*{userCategory != null}">
+            <label>Categoria (Permissão):</label>
+            <p class="detail-value" style="border-left-color: var(--warning);" th:text="*{userCategory.category}"></p>
+        </div>
+
+        <div class="detail-item">
+            <label>Nome Completo:</label>
+            <p class="detail-value" th:text="*{name} + ' ' + *{middleName}"></p>
+        </div>
+        <div class="detail-item">
+            <label>Email:</label>
+            <p class="detail-value" th:text="*{email}"></p>
+        </div>
+        <div class="detail-item">
+            <label>CPF:</label>
+            <p class="detail-value" th:text="*{cpf}"></p>
+        </div>
+        <div class="detail-item" th:if="*{birthday != null}">
+            <label>Data de Nascimento:</label>
+            <p class="detail-value" th:text="*{#temporals.format(birthday, 'dd/MM/yyyy')}"></p>
+        </div>
     </div>
 
-    <a href="/users" class="back-link">Voltar para a lista</a>
+    <div style="margin-top: 30px; display: flex; align-items: center; justify-content: center; gap: 30px; max-width: 550px;">
+
+            <span sec:authorize="hasAuthority('ADMIN')">
+                <a th:href="@{'/users/edit/' + ${user.id}}"
+                   class="btn"
+                   style="background-color: var(--primary); padding: 12px 25px; font-weight: 600;">
+                   Editar Usuário
+                </a>
+            </span>
+
+        <a th:href="@{/}" class="back-link" style="margin-top: 0;">← Voltar para o menu</a>
+    </div>
 
 </div>
 </body>
